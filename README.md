@@ -1,2 +1,1 @@
-# HarvardAgileSoftwareDev
 # foca-wes
