@@ -1,0 +1,131 @@
+#1: Stripped from Sample Pet Store Config file - replace Pets with 'sample'
+server:
+  host: "0.0.0.0"
+  port: 8080
+  debug: True
+  environment: development
+  testing: False
+  use_reloader: True
+
+api:
+  specs:
+    - path: sample.yaml
+      append: null
+      add_operation_fields:
+        x-openapi-router-controller: controllers
+      connexion:
+        strict_validation: True
+        validate_responses: False
+        options:
+          swagger_ui: True
+          serve_spec: True
+
+security:
+  auth:
+    required: False
+    add_key_to_claims: True
+    algorithms:
+      - RS256
+    allow_expired: False
+    audience: null
+    claim_identity: sub
+    claim_issuer: iss
+    claim_key_id: kid
+    header_name: Authorization
+    token_prefix: Bearer
+    validation_methods:
+      - userinfo
+      - public_key
+    validation_checks: all
+
+db:
+  host: mongodb
+  port: 27017
+  dbs:
+    petstore:
+      collections:
+        sample:
+          indexes: null
+
+jobs:
+  host: rabbitmq
+  port: 5672
+  backend: "rpc://"
+
+log:
+  version: 1
+  disable_existing_loggers: False
+  formatters:
+    standard:
+      class: logging.Formatter
+      style: "{"
+      format: "[{asctime}: {levelname:<8}] {message} [{name}]"
+  handlers:
+    console:
+      class: logging.StreamHandler
+      level: 20
+      formatter: standard
+      stream: ext://sys.stderr
+  root:
+    level: 10
+    handlers: [console]
+
+#2: Stripped for cwl-wes app_config.yaml file.
+
+storage:
+  permanent_dir: "/data/output"
+  tmp_dir: "/data/tmp"
+  remote_storage_url: "ftp://ftp-private.ebi.ac.uk/upload/foivos"
+
+# Perhaps covered by 'jobs' above?
+celery:
+  broker_host: rabbitmq
+  broker_port: 5672
+  result_backend: "rpc://"
+  include:
+    - cwl_wes.tasks.tasks.run_workflow
+    - cwl_wes.tasks.tasks.cancel_run
+  monitor:
+    timeout: 0.1
+  message_maxsize: 16777216
+
+# WES service info settings
+service_info:
+  contact_info: "https://github.com/elixir-cloud-aai/cwl-WES"
+  auth_instructions_url: "https://www.elixir-europe.org/services/compute/aai"
+  supported_file_system_protocols:
+    - ftp
+    - https
+    - local
+  supported_wes_versions:
+    - 1.0.0
+  workflow_type_versions:
+    CWL:
+      workflow_type_version:
+        - v1.0
+  workflow_engine_versions:
+    cwl-tes: 0.2.0
+  default_workflow_engine_parameters:
+    - type: string
+      default_value: some_string
+    - type: int
+      default_value: "5"
+  tags:
+    known_tes_endpoints: "https://tes.tsi.ebi.ac.uk/|https://tes-dev.tsi.ebi.ac.uk/|https://csc-tesk.c03.k8s-popup.csc.fi/|https://tesk.c01.k8s-popup.csc.fi/"
+    app_version: 0.15.0
+
+# TES server (needed?)
+tes:
+  url: "https://csc-tesk.c03.k8s-popup.csc.fi/"
+  timeout: 5
+  status_query_params: "FULL"
+
+# DRS integration (needed?)
+drs:
+  port: Null # use this port for resolving DRS URIs; set to `Null` to use default (443)
+  base_path: Null # use this base path for resolving DRS URIs; set to `Null` to use default (`ga4gh/drs/v1`)
+  use_http: False # use `http` for resolving DRS URIs; set to `False` to use default (`https`)
+  file_types: # extensions of files to scan for DRS URI resolution
+    - cwl
+    - yaml
+    - yml
